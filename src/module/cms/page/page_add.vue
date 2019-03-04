@@ -122,9 +122,23 @@
     },
     methods: {
       addSubmit() {
-        this.$refs.pageForm.validate((valid) => {
+        this.$refs['pageForm'].validate((valid) => {
           if (valid) {
-            alert('提交');
+            this.$confirm('您确认提交吗?', '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+            }).then(() => {
+              // 调用page_add方法,请求服务端的新增页面接口
+              cmsApi.page_add(this.pageForm).then(res=>{
+                // 解析服务端的响应内容
+                if(res.success){
+                  this.$message.success("提交成功");
+                  this.$refs['pageForm'].resetFields();
+                }else{
+                  this.$message.error(res.message);
+                }
+              });
+            })
           }
         })
       },

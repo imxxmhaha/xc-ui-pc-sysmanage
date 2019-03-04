@@ -10,13 +10,14 @@
           :value="item.siteId">
         </el-option>
       </el-select>
-      页面别名：<el-input v-model="params.pageAliase"  style="width: 100px"></el-input>
-      <el-button type="primary" v-on:click="query"  size="small">查询</el-button>
+      页面别名：
+      <el-input v-model="params.pageAliase" style="width: 100px"></el-input>
+      <el-button type="primary" v-on:click="query" size="small">查询</el-button>
 
       <router-link class="mui-tab-item" :to="{path:'/cms/page/add/',query:{
-  page: this.params.page,
-  siteId: this.params.siteId}}">
-        <el-button  type="primary" size="small">新增页面</el-button>
+  page: this.params.page,
+  siteId: this.params.siteId}}">
+        <el-button type="primary" size="small">新增页面</el-button>
       </router-link>
 
     </el-form>
@@ -37,6 +38,19 @@
       <el-table-column prop="pagePhysicalPath" label="物理路径" width="250">
       </el-table-column>
       <el-table-column prop="pageCreateTime" label="创建时间" width="180">
+      </el-table-column>
+
+      <el-table-column label="操作" width="80">
+        <template slot-scope="page">
+          <el-button
+            size="small" type="text"
+            @click="edit(page.row.pageId)">编辑
+          </el-button>
+          <el-button
+            size="small" type="text"
+            @click="del(page.row.pageId)">删除
+          </el-button>
+        </template>
       </el-table-column>
     </el-table>
     <el-pagination
@@ -67,22 +81,22 @@
         siteList: []
       }
     },
-    created(){
+    created() {
       //取出路由中的参数,赋值给数据对象
-      this.params.page =Number.parseInt(this.$route.query.page || 1) ; // 双竖线 类似于三元表达式
+      this.params.page = Number.parseInt(this.$route.query.page || 1); // 双竖线 类似于三元表达式
       this.params.siteId = this.$route.query.siteId || null;
     },
-    mounted(){
+    mounted() {
       //初始化站点列表
-      this.params.siteId = this.params.siteId==null?"5a751fab6abb5044e0d19ea1":this.params.siteId;
+      this.params.siteId = this.params.siteId == null ? "5a751fab6abb5044e0d19ea1" : this.params.siteId;
       this.siteList = [
         {
-          siteId:'5a751fab6abb5044e0d19ea1',
-          siteName:'门户主站'
+          siteId: '5a751fab6abb5044e0d19ea1',
+          siteName: '门户主站'
         },
         {
-          siteId:'102',
-          siteName:'测试站'
+          siteId: '102',
+          siteName: '测试站'
         }
       ]
       this.query();
@@ -91,10 +105,10 @@
       query() {
         // alert("查询");
         //调用服务端接口
-        cmsApi.page_list(this.params.page, this.params.size,this.params).then((res) => {
-          // 将res结果数据赋值给数据模型对象
-          this.list = res.queryResult.list;
-          this.total = res.queryResult.total;
+        cmsApi.page_list(this.params.page, this.params.size, this.params).then((res) => {
+            // 将res结果数据赋值给数据模型对象
+            this.list = res.queryResult.list;
+            this.total = res.queryResult.total;
           }
         )
       },
@@ -102,6 +116,36 @@
         // alert(currentPage);
         this.params.page = currentPage;
         this.query();
+      },
+      //修改
+      edit: function (pageId) {
+        this.$router.push({
+          path: '/cms/page/edit/' + pageId, query: {
+            page: this.params.page,
+            siteId: this.params.siteId
+          }
+        })
+      },
+      //删除 
+      del: function (pageId) {
+        this.$confirm('确认删除此页面吗?', '提示', {}).then(() => {
+          cmsApi.page_del(pageId).then((res) => {
+            if (res.success) {
+              this.$message({
+                type: 'success',
+                message: '删除成功!'
+              });
+              //查询页面 
+              this.query()
+            } else {
+              this.$message({
+                type: 'error',
+                message: '删除失败!'
+              });
+            }
+          })
+
+        })
       }
     }
   }
