@@ -49,6 +49,7 @@
             @click="del(page.row.pageId)">删除
           </el-button>
           <el-button @click="preview(page.row.pageId)" type="text" size="small">页面预览</el-button>
+          <el-button plain @click="postPage(page.row.pageId)" type="primary" size="small">发布</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -102,8 +103,22 @@
     },
     methods: {
       //页面预览
-      preview(pageId){
-        window.open("http://www.xuecheng.com/cms/preview/"+pageId)
+      preview(pageId) {
+        window.open("http://www.xuecheng.com/cms/preview/" + pageId)
+      },
+      postPage(pageId) {
+        this.$confirm('确认发布该页面吗?', '提示', {}).then(() => {
+          cmsApi.page_postPage(pageId).then((res) => {
+            if (res.success) {
+              console.log('发布页面pageId=' + pageId);
+              this.$message.success('发布成功，请稍后查看结果');
+            } else {
+              this.$message.error('发布失败');
+            }
+          });
+        }).catch(() => {
+
+        });
       },
       query() {
         // alert("查询");
